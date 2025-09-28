@@ -1,7 +1,11 @@
 import axios from 'axios';
 
+// Replace with your Render backend URL
+const BASE_URL = process.env.REACT_APP_API_URL?.replace(/\/$/, '') 
+                 || 'https://event-registration-system-2167.onrender.com/api';
+
 const API = axios.create({
-  baseURL: process.env.REACT_APP_API_URL?.replace(/\/$/, '') || 'http://localhost:5000/api'
+  baseURL: BASE_URL
 });
 
 export function setAuthToken(token) {
