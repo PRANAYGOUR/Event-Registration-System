@@ -1,0 +1,26 @@
+version: '3.8'
+services:
+  mongo:
+    image: mongo:6
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - "27017:27017"
+
+  server:
+    build: ./server
+    restart: unless-stopped
+    depends_on:
+      - mongo
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/eventdb
+      - JWT_SECRET=devsecret
+      - ADMIN_EMAIL=admin@example.com
+      - ADMIN_PASSWORD=Admin@123
+      - ADMIN_NAME=Admin
+
+volumes:
+  mongo-data:
