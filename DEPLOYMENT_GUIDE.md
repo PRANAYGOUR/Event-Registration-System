@@ -5,7 +5,12 @@
 ### 1. Authentication Issue (FIXED)
 The main issue was in `server/routes/auth.js` - the student login route was incorrectly checking for admin credentials instead of student credentials. This has been fixed.
 
-### 2. CORS Configuration (FIXED)
+### 2. Admin Login Error (FIXED - NEW)
+Fixed the "data and hash arguments required" error by updating the frontend Login component to use the correct API endpoints:
+- Student login: `/auth/login` (uses bcrypt password comparison)
+- Admin login: `/admin/login` (uses plain text password comparison)
+
+### 3. CORS Configuration (FIXED)
 Updated CORS settings to allow cross-origin requests from your Vercel frontend.
 
 ## 📋 Deployment Steps

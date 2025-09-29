@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import API, { setAuthToken } from "../utils/api";
+import API, { setAuthToken, studentLogin, adminLogin } from "../utils/api";
 import studentImage from "../assets/student.jpg"; // adjust path if needed
 
 export default function Login({ setUser }) {
@@ -14,8 +14,18 @@ export default function Login({ setUser }) {
   const submit = async (e) => {
     e.preventDefault();
     try {
-      const res = await API.post("/auth/login", { email, password });
-      const { token, user } = res.data;
+      // Use different login functions for student vs admin
+      const loginFunction = role === "admin" ? adminLogin : studentLogin;
+      const res = await loginFunction({ email, password });
+      
+      // Handle different response structures
+      const token = res.data.token;
+      const user = role === "admin" ? res.data.admin : res.data.user;
+      
+      // For admin, we need to add the role since it's not included in admin response
+      if (role === "admin") {
+        user.role = "admin";
+      }
 
       if (role === "admin" && user.role !== "admin") {
         setMsg("Invalid admin credentials");
