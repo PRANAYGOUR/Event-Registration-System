@@ -38,27 +38,35 @@ router.post("/register", async (req, res, next) => {
 });
 
 // LOGIN
-// ADMIN LOGIN (plain text, no bcrypt)
+// STUDENT LOGIN (with bcrypt)
 router.post("/login", async (req, res, next) => {
   try {
     const { email, password } = req.body;
     if (!email || !password)
       return res.status(400).json({ msg: "Email and password required" });
 
-    const admin = await Admin.findOne({ email });
-    if (!admin) return res.status(400).json({ msg: "Invalid credentials" });
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ msg: "Invalid credentials" });
 
-    // 🔹 Plain text password comparison
-    if (admin.password !== password)
-      return res.status(400).json({ msg: "Invalid credentials" });
+    // 🔹 Compare hashed password
+    const isMatch = await bcrypt.compare(password, user.passwordHash);
+    if (!isMatch) return res.status(400).json({ msg: "Invalid credentials" });
 
     const token = jwt.sign(
-      { id: admin._id, email: admin.email },
+      { id: user._id, role: user.role, name: user.name },
       JWT_SECRET,
       { expiresIn: "7d" }
     );
 
-    res.json({ token, admin: { id: admin._id, email: admin.email } });
+    res.json({ 
+      token, 
+      user: { 
+        id: user._id, 
+        name: user.name, 
+        email: user.email, 
+        role: user.role 
+      } 
+    });
   } catch (err) {
     next(err);
   }
