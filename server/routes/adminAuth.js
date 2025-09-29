@@ -1,10 +1,10 @@
 const router = require("express").Router();
-const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const Admin = require("../models/Admin");
 
 const JWT_SECRET = process.env.JWT_SECRET || "change_this_in_prod";
 
+// ADMIN LOGIN (plain text, no bcrypt)
 router.post("/login", async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -14,13 +14,15 @@ router.post("/login", async (req, res, next) => {
     const admin = await Admin.findOne({ email });
     if (!admin) return res.status(400).json({ msg: "Invalid credentials" });
 
-    if (!admin.password)
-      return res.status(400).json({ msg: "Password missing for this admin" });
+    // 🔹 Plain text password comparison
+    if (admin.password !== password)
+      return res.status(400).json({ msg: "Invalid credentials" });
 
-    const ok = await bcrypt.compare(password, admin.password);
-    if (!ok) return res.status(400).json({ msg: "Invalid credentials" });
-
-    const token = jwt.sign({ id: admin._id, email: admin.email }, JWT_SECRET, { expiresIn: "7d" });
+    const token = jwt.sign(
+      { id: admin._id, email: admin.email },
+      JWT_SECRET,
+      { expiresIn: "7d" }
+    );
 
     res.json({ token, admin: { id: admin._id, email: admin.email } });
   } catch (err) {
