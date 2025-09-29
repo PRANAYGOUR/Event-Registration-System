@@ -1,35 +1,30 @@
-const express = require("express");
-const bcrypt = require("bcryptjs");
+const router = require("express").Router();
+const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const Admin = require("../models/Admin");
 
-const router = express.Router();
+const JWT_SECRET = process.env.JWT_SECRET || "change_this_in_prod";
 
-// POST /api/admin/login
-router.post("/login", async (req, res) => {
+router.post("/login", async (req, res, next) => {
   try {
     const { email, password } = req.body;
+    if (!email || !password)
+      return res.status(400).json({ msg: "Email and password required" });
 
-    // Find admin
     const admin = await Admin.findOne({ email });
-    if (!admin) {
-      return res.status(400).json({ msg: "Admin not found" });
-    }
+    if (!admin) return res.status(400).json({ msg: "Invalid credentials" });
 
-    // Compare password
-    const isMatch = await bcrypt.compare(password, admin.password);
-    if (!isMatch) {
-      return res.status(400).json({ msg: "Invalid credentials" });
-    }
+    if (!admin.password)
+      return res.status(400).json({ msg: "Password missing for this admin" });
 
-    // Generate token
-    const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h"
-    });
+    const ok = await bcrypt.compare(password, admin.password);
+    if (!ok) return res.status(400).json({ msg: "Invalid credentials" });
+
+    const token = jwt.sign({ id: admin._id, email: admin.email }, JWT_SECRET, { expiresIn: "7d" });
 
     res.json({ token, admin: { id: admin._id, email: admin.email } });
   } catch (err) {
-    res.status(500).json({ msg: "Server error" });
+    next(err);
   }
 });
 
