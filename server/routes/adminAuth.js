@@ -4,7 +4,7 @@ const Admin = require("../models/Admin");
 
 const JWT_SECRET = process.env.JWT_SECRET || "change_this_in_prod";
 
-// ADMIN LOGIN (plain text, no bcrypt)
+// Admin login route
 router.post("/login", async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -14,15 +14,12 @@ router.post("/login", async (req, res, next) => {
     const admin = await Admin.findOne({ email });
     if (!admin) return res.status(400).json({ msg: "Invalid credentials" });
 
-    // 🔹 Plain text password comparison
     if (admin.password !== password)
       return res.status(400).json({ msg: "Invalid credentials" });
 
-    const token = jwt.sign(
-      { id: admin._id, email: admin.email },
-      JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+    const token = jwt.sign({ id: admin._id, email: admin.email }, JWT_SECRET, {
+      expiresIn: "7d",
+    });
 
     res.json({ token, admin: { id: admin._id, email: admin.email } });
   } catch (err) {
