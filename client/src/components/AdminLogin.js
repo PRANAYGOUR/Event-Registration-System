@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import API, { setAuthToken } from "../utils/api";
+import { adminLogin, setAuthToken } from "../utils/api"; // ⬅️ use adminLogin
 import "./../styles/main.css";
 
 export default function AdminLogin({ setUser }) {
@@ -12,22 +12,19 @@ export default function AdminLogin({ setUser }) {
   const submit = async (e) => {
     e.preventDefault();
     try {
-      const res = await API.post("/auth/login", { email, password });
-      const { token, user } = res.data;
+      // ⬅️ call admin login API
+      const res = await adminLogin({ email, password });
+      const { token, admin } = res.data;
 
-      if (user.role !== "admin") {
-        setMsg("Invalid credentials for admin login");
-        return;
-      }
-
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
+      // store admin token separately
+      localStorage.setItem("adminToken", token);
+      localStorage.setItem("admin", JSON.stringify(admin));
       setAuthToken(token);
-      setUser(user);
+      setUser(admin);
 
-      nav("/admin");
+      nav("/admin"); // redirect to admin dashboard
     } catch (err) {
-      setMsg(err.response?.data?.message || "Login failed");
+      setMsg(err.response?.data?.msg || "Admin login failed");
     }
   };
 
