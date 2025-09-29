@@ -3,7 +3,7 @@ const router = require("express").Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
-
+const Admin = require("../models/Admin");
 const JWT_SECRET = process.env.JWT_SECRET || "change_this_in_prod";
 
 // REGISTER
@@ -65,4 +65,5 @@ router.post("/login", async (req, res, next) => {
 });
 
 module.exports = router;
+
 
