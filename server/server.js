@@ -21,10 +21,12 @@ mongoose.connect(process.env.MONGO_URI, {
 const authRoutes = require("./routes/auth");
 const eventRoutes = require("./routes/events");
 const registrationRoutes = require("./routes/registrations");
+const adminAuthRoutes = require("./routes/adminAuth"); // ⬅️ NEW
 
-app.use("/api/auth", authRoutes);
-app.use("/api/events", eventRoutes); // admin-protected POST
-app.use("/api/registrations", registrationRoutes);
+app.use("/api/auth", authRoutes);                // student login/register
+app.use("/api/events", eventRoutes);             // events
+app.use("/api/registrations", registrationRoutes); 
+app.use("/api/admin", adminAuthRoutes);          // ⬅️ admin login
 
 // Root route
 app.get("/", (req, res) => {
