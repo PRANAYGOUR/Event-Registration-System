@@ -21,7 +21,14 @@ router.post("/login", async (req, res, next) => {
       expiresIn: "7d",
     });
 
-    res.json({ token, admin: { id: admin._id, email: admin.email } });
+    res.json({ 
+      token, 
+      admin: { 
+        id: admin._id, 
+        email: admin.email,
+        role: "admin" 
+      } 
+    });
   } catch (err) {
     next(err);
   }

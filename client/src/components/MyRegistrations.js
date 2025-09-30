@@ -9,7 +9,7 @@ export default function MyRegistrations({ user }) {
   // Fetch registrations for current user
   const fetchRegs = async () => {
     try {
-      const res = await API.get('/registrations/me'); // backend endpoint
+      const res = await API.get('/registrations'); // backend endpoint
       setRegs(res.data);
       setMsg('');
     } catch (err) {

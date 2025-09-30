@@ -55,10 +55,10 @@ router.get("/", auth, async (req, res) => {
 });
 
 // GET /api/registrations/all → admin route: fetch all events with all registrations
-router.get("/all", auth, async (req, res) => {
-  try {
-    if (req.user.role !== "admin") return res.status(403).json({ message: "Access denied" });
+const adminAuth = require("../middleware/adminAuth");
 
+router.get("/all", adminAuth, async (req, res) => {
+  try {
     const events = await Event.find().populate("registrations", "name email").select(
       "title date venue registrations"
     );
