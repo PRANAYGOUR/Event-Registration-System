@@ -5,14 +5,47 @@ require("dotenv").config();
 
 const app = express();
 
-// Middleware
+// Middleware - Dynamic CORS for production
+const allowedOrigins = [
+  'https://event-registration-system-nu.vercel.app',  // Your Vercel frontend
+  'https://event-registration-system-nu.vercel.app/',  // With trailing slash variant
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:3001'
+];
+
+// Add your specific production URLs here
+if (process.env.FRONTEND_URL) {
+  allowedOrigins.push(process.env.FRONTEND_URL);
+  // Also add with trailing slash variant
+  if (!process.env.FRONTEND_URL.endsWith('/')) {
+    allowedOrigins.push(process.env.FRONTEND_URL + '/');
+  }
+}
+
 app.use(cors({
-  origin: ['https://event-registration-system-nu.vercel.app', 'http://localhost:3000'],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log('CORS blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  exposedHeaders: ['Authorization'],
+  maxAge: 86400 // 24 hours
 }));
 app.use(express.json()); // parse JSON bodies
+
+// Handle preflight requests
+app.options('*', cors()); // Enable pre-flight across-the-board
 
 // Connect MongoDB
 mongoose.connect(process.env.MONGO_URI, {
